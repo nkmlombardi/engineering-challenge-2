@@ -226,21 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     getRequest('https://appcues-interviews.firebaseio.com/calendar/events.json',
         function success(events) {
-            events = {
-                "id-1": { "start": 30, "end": 149 },
-                "id-2": { "start": 580, "end": 649 },
-                "id-3": { "start": 560, "end": 619 },
-                "id-4": { "start": 630, "end": 699 },
-                "id-5": { "start": 580, "end": 649 },
-                "id-6": { "start": 630, "end": 699 },
-                "id-7": { "start": 630, "end": 699 },
-                "id-8": { "start": 580, "end": 649 },
-            }
-
-            console.log(events)
-
-            events = layOutDay(events)
-
+            events =  layOutDay(JSON.parse(events)) || {}
             console.log('after: ', events)
 
             var eventList = document.getElementById('event-list')
