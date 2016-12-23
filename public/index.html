@@ -15,9 +15,11 @@
 </head>
 <body>
     <div class="container">
-        <ul id="time-list" class="times">
-
-        </ul>
+        <div class="time-tray">
+            <ul id="time-list">
+                <!-- Injected Times -->
+            </ul>
+        </div>
 
         <div class="events-tray">
             <ul id="event-list">
@@ -26,8 +28,12 @@
         </div>
     </div>
 
+    <script type="text/javascript">
+        var url = 'https://appcues-interviews.firebaseio.com/calendar/events.json'
+    </script>
 
     <!-- Application -->
-    <script src="application.js"></script>
+    <script src="Calendar.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>

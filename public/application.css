@@ -16,10 +16,15 @@ body {
     margin: 25px;
 }
 
+.time-tray {
+    float: left;
+    width: 100px;
+    height: 100%;
+}
+
 #time-list {
     width: 100px;
     height: 100%;
-    float: left;
     list-style: none;
     padding: 0;
     margin: 0;

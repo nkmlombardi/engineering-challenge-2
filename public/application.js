@@ -20,11 +20,14 @@ function layOutDay(events) {
                 id: key,
                 start: events[key].start,
                 end: events[key].end,
-
-                times: events[key].start + ' -> ' + events[key].end,
-
                 index: 0,
-                collisions: 0
+                collisions: [],
+
+                width: 600,
+                top: events[key].start,
+                maxCollisions: 0,
+                index: 0,
+                equal: false
             })
         }
     }
@@ -33,29 +36,28 @@ function layOutDay(events) {
         Iterate over events and identify where there are collisions. Accumulate them
         as an array property on the object.
      */
-    eventsArray = eventsArray.map(function(event) {
+    eventsArray.forEach(function(event) {
+        // Calculate the numer of collisions an event has
         event.collisions = eventsArray.filter(function(cEvent) {
-            // If we aren't looking at the same event
-            if (event.id !== cEvent.id) {
-
-                // If the start of the event is in range*
-                if (event.start >= cEvent.start && event.start <= cEvent.end) {
-                    return cEvent
-                }
-
-                // If the end of the event is in range
-                if (event.end >= cEvent.start && event.end <= cEvent.end) {
-                    return cEvent
-                }
-
-                // If the median of the event range is inside the range
-                if ((event.start + event.end) / 2 >= cEvent.start && (event.start + event.end) / 2 <= cEvent.end) {
-                    return cEvent
-                }
+            // Don't compare an event to itself && if the time ranges overlap
+            if (event.id !== cEvent.id && (event.start <= cEvent.end && cEvent.start <= event.end)) {
+                return cEvent
             }
         })
 
-        return event
+        if (event.collisions.length > 0) {
+            // Determine if all collisions are equivalent
+            event.equal = event.collisions.reduceRight(function(previous, current) {
+                return event.collisions.length === current.collisions.length
+            }, true)
+
+            // Don't bother calculating maxCollisions if all events are equal
+            if (event.equal === false) {
+                event.maxCollisions = Math.max.apply(Math, event.collisions.map(function(o) {
+                    return o.collisions.length
+                }))
+            }
+        }
     })
 
 
@@ -63,27 +65,11 @@ function layOutDay(events) {
         Iterate over the array and calculate left and width properties.
      */
     return eventsArray.map(function(event) {
-        event.width = 600
-        event.maxCollisions = 0
-        event.index = 0
-        event.equal = false
-
-        // Determine child event with most collisions
-        if (event.collisions.length > 0) {
-            event.maxCollisions = Math.max.apply(Math, event.collisions.map(function(o) {
-                return o.collisions.length
-            }))
-
-            // Determine if all collisions are equivalent
-            event.equal = event.collisions.reduceRight(function(previous, current) {
-                return event.collisions.length === current.collisions.length
-            }, true)
-        }
-
+        console.log('Event Properties: ', event)
 
         // If event has the same amount of collisions as all other colliding events, then
         // they should be placed one by one next to each other
-        if (event.equal) {
+        if (event.equal === true) {
             event.collisions.map(function(cEvent, index) {
                 cEvent.index = index
                 cEvent.width = event.width / (event.collisions.length + 1)
@@ -98,21 +84,26 @@ function layOutDay(events) {
         // If event with most collisions is more than current event's collisions, set the
         // index to be less so it is aligned to the left of that event
         if (event.collisions.length < event.maxCollisions) {
-            // event.index = event.collisions.length - 1
-            // event.width = event.width / event.maxCollisions + 1
 
+            // Sort collisions by the amount of collisions they have
             event.sortedCollisions = event.collisions.sort(function(firstEvent, secondEvent) {
                 return firstEvent.collisions.length < secondEvent.collisions.length
             })
 
-            event.sortedCollisions.map(function(cEvent, index) {
+            // Assign an index to each collision after we've sorted them
+            event.sortedCollisions.forEach(function(cEvent, index) {
                 cEvent.index = index + 1
                 cEvent.width = event.width / (event.collisions.length + 1)
                 cEvent.left = cEvent.width * cEvent.index
             })
 
-            event.width = event.width / (event.maxCollisions)
+            // Calculate width
+            event.width = event.width / event.maxCollisions
             event.index = 0
+        }
+
+        if (event.collisions.length > event.maxCollisions) {
+            event.width = event.width / event.maxCollisions
         }
 
         // Calculate the x position of the element
@@ -224,40 +215,63 @@ document.addEventListener('DOMContentLoaded', function() {
         timeList.appendChild(timeElement)
     })
 
-    getRequest('https://appcues-interviews.firebaseio.com/calendar/events.json',
+    getRequest(url,
         function success(events) {
-            events = {
-                "id-1": { "start": 30, "end": 149 },
-                "id-2": { "start": 580, "end": 649 },
-                "id-3": { "start": 560, "end": 619 },
-                "id-4": { "start": 630, "end": 699 },
-                "id-5": { "start": 580, "end": 649 },
-                "id-6": { "start": 630, "end": 699 },
-                "id-7": { "start": 630, "end": 699 },
-                "id-8": { "start": 580, "end": 649 },
-            }
+            events = layOutDay({
+                // "id-1": {
+                //     "start": 30,
+                //     "end": 150
+                // },
+                // "id-2": {
+                //     "start": 540,
+                //     "end": 650
+                // },
+                "id-3": {
+                    "start": 560,
+                    "end": 620
+                },
+                "id-4": {
+                    "start": 630,
+                    "end": 700
+                },
+                "id-5": {
+                    "start": 100,
+                    "end": 400
+                },
+                "id-6": {
+                    "start": 200,
+                    "end": 300
+                },
+                "id-7": {
+                    "start": 200,
+                    "end": 300
+                },
+                // "id-8": {
+                //     "start": 50,
+                //     "end": 700
+                // }
+            })
 
-            console.log(events)
 
-            events = layOutDay(events)
-
-            console.log('after: ', events)
+            console.log('Calculated Events: ', events)
 
             var eventList = document.getElementById('event-list')
-
             events.forEach(function(event) {
                 var eventElement = document.createElement('li')
                 eventElement.setAttribute('style',
                     'position: absolute; ' +
                     'height: ' + (event.end - event.start) + 'px;' +
                     'width: ' + event.width + 'px;' +
-                    'top: ' + event.start + 'px;' +
+                    'top: ' + event.top + 'px;' +
                     'left: ' + event.left + 'px;'
                 )
-                eventElement.innerHTML = '<span class="title">' + event.id + ' NOC Item</span>' +
-                    '<p>' + event.start + ' -> ' + event.end + '</p>'
+                eventElement.innerHTML = '<span class="title">' + event.id + '</span>' + '<p>' + event.start + ' --> ' + event.end + '</p>'
                 eventList.appendChild(eventElement)
+
+                event.element = eventElement
             })
+
+            console.log('Placed Events: ', events)
         },
 
         function error(error) {
