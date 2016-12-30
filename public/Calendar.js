@@ -22,6 +22,10 @@ var Calendar = function(options) {
 }
 
 
+/**
+ * Add list of events to calendar
+ * @param {[type]} newEvents [description]
+ */
 Calendar.prototype.addEvents = function(newEvents) {
     var scope = this
 
@@ -30,7 +34,7 @@ Calendar.prototype.addEvents = function(newEvents) {
         return a.start > b.start
 
     // Add computed properties to each event object
-    }).map(function(event) {
+    }).forEach(function(event) {
         scope.events.push({
             // Static Properties
             id: event.id,
@@ -43,21 +47,28 @@ Calendar.prototype.addEvents = function(newEvents) {
             width: scope.width,
             collisions: [],
             maxCollisions: 0,
-            equal: false
+            equal: false,
+            set: false
         })
     })
+
+    console.log('sorted Events Array: ', this.events.slice(0).map(function(item) { return Object.assign({}, item) }))
 
     /*
         Since we have new events, let's recalculate both
         collisions and the positions of the events
      */
     scope.collisions()
-    scope.placeEvents()
+    scope.recursivePlace()
 
     return scope.events
 }
 
 
+/**
+ * Calculate collisions for each event
+ * @return {[type]} [description]
+ */
 Calendar.prototype.collisions = function() {
     console.log('Before Collisions Function: ', this.events.slice(0).map(function(item) { return Object.assign({}, item) }))
     var scope = this
@@ -89,10 +100,12 @@ Calendar.prototype.collisions = function() {
             //     return event.collisions.length === current.collisions.length
             // }, true)
 
-            // Determine if all collisions are equivalent
+            // Determine if all collisions collide with each other
             event.equal = (event.collisions.reduce(function(previous, current) {
                 return previous + current.collisions.length
             }, 0) / event.collisions.length) === event.collisions.length ? true : false
+
+            event.maxCollisions = event.collisions.length + 1
 
             // Don't bother calculating maxCollisions if all events are equal
             if (event.equal === false) {
@@ -108,69 +121,139 @@ Calendar.prototype.collisions = function() {
     })
 }
 
+
+Calendar.prototype.recursivePlace = function() {
+    var scope = this
+
+    var recurse = function(event, index) {
+        // console.log('Recursing: ', event, index)
+
+        // If all events have equal amount of collisions / collide with each other
+        if (event.equal === true) {
+            event.index = index
+            event.width = scope.width / (event.collisions.length + 1)
+            event.left = event.width * event.index
+            event.condition = 1
+
+        // If event doesn't have most collisions
+        } else if (event.collisions.length < event.maxCollisions) {
+            var indexes = event.collisions.map(function(cEvent) { return cEvent.index })
+
+            for (var i = 0; i < (event.collisions.length + 1); i++) {
+                if (indexes.indexOf(i) === -1) {
+                    event.index = i
+                    break
+                }
+            }
+
+            event.width = scope.width / event.maxCollisions
+            event.left = event.width * event.index
+            event.condition = 2
+
+        // If event has most collisions
+        } else {
+            event.width = scope.width / event.collisions.length
+            event.left = event.width * index
+            event.index = index
+            event.condition = 3
+        }
+
+        event.set = true
+        console.log('Condition: ', event.id, event.condition)
+
+        event.collisions.forEach(function(event) {
+            if (event.set === false) {
+                recurse(event, (index + 1))
+            }
+        })
+    }
+
+    this.events.forEach(function(event) {
+        if (event.set === false) {
+            recurse(event, 0)
+        }
+    })
+}
+
+
+
+/**
+ * Calculate position for each event
+ * @return {[type]} [description]
+ */
 Calendar.prototype.placeEvents = function() {
     console.log('Before placeEvents Function: ', this.events.slice(0).map(function(item) { return Object.assign({}, item) }))
     var scope = this
 
     this.events = this.events.map(function(event) {
 
-        // If event has the same amount of collisions as all other colliding events, then
-        // they should be placed one by one next to each other
-        if (event.equal === true) {
-            event.collisions.map(function(cEvent, index) {
-                cEvent.index = index
-                cEvent.width = scope.width / (event.collisions.length + 1)
-                cEvent.left = cEvent.width * cEvent.index
-            })
+        if (event.set === false) {
 
-            event.width = scope.width / (event.collisions.length + 1)
-            event.index = event.collisions.length
-            event.left = event.width * event.index
+            // If event has the same amount of collisions as all other colliding events, then
+            // they should be placed one by one next to each other
+            if (event.equal === true) {
+                event.collisions.map(function(cEvent, index) {
+                    if (cEvent.set === false) {
+                        cEvent.index = index
+                        cEvent.width = scope.width / (event.collisions.length + 1)
+                        cEvent.left = cEvent.width * cEvent.index
+                        cEvent.set = true
+                    }
+                })
 
-            event.condition = 1
+                event.width = scope.width / (event.collisions.length + 1)
+                event.index = event.collisions.length
+                event.left = event.width * event.index
 
-            console.log('Event ' + event.id + ' exiting because equal: ', event.width, event.index, event.left)
+                event.condition = 1
+                event.set = true
 
-            return event
-        }
+                console.log('Event ' + event.id + ' exiting because equal: ', event.width, event.index, event.left)
 
-        // If event with most collisions is more than current event's collisions, set the
-        // index to be less so it is aligned to the left of that event
-        if (event.collisions.length < event.maxCollisions) {
+                return event
+            }
 
-            // Sort collisions by the amount of collisions they have
-            var sortedCollisions = event.collisions.sort(function(firstEvent, secondEvent) {
-                return firstEvent.collisions.length < secondEvent.collisions.length
-            })
+            // If event with most collisions is more than current event's collisions, set the
+            // index to be less so it is aligned to the left of that event
+            if (event.collisions.length < event.maxCollisions) {
 
-            // Assign an index to each collision after we've sorted them
-            sortedCollisions.forEach(function(cEvent, index) {
-                cEvent.index = index + 1
-                cEvent.width = scope.width / event.maxCollisions
-                cEvent.left = cEvent.width * cEvent.index
-            })
+                // Sort collisions by the amount of collisions they have
+                var sortedCollisions = event.collisions.sort(function(firstEvent, secondEvent) {
+                    return firstEvent.collisions.length < secondEvent.collisions.length
+                })
 
-            event.sorted = sortedCollisions
+                // Assign an index to each collision after we've sorted them
+                sortedCollisions.forEach(function(cEvent, index) {
+                    cEvent.index = index + 1
+                    cEvent.width = scope.width / event.maxCollisions
+                    cEvent.left = cEvent.width * cEvent.index
+                })
 
-            // Calculate width
-            event.width = scope.width / event.maxCollisions
-            event.index = 0
-            event.left = scope.width * event.index
+                event.sorted = sortedCollisions
 
-            event.condition = 2
+                // Calculate width
+                event.width = scope.width / event.maxCollisions
+                event.index = 0
+                event.left = scope.width * event.index
 
-            console.log('Event', event)
+                event.condition = 2
+                event.set = true
 
-            return event
-        }
+                console.log('Event', event)
+
+                return event
+            }
 
 
-        if (event.collisions.length > event.maxCollisions) {
-            event.width = scope.width / event.maxCollisions
-            event.condition = 3
-            event.left = scope.width * event.index
+            if (event.collisions.length > event.maxCollisions) {
+                event.width = scope.width / event.maxCollisions
+                event.left = scope.width * event.index
 
-            return event
+                event.condition = 3
+                event.set = true
+
+                return event
+            }
         }
 
         return event

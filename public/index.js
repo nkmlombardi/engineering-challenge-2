@@ -103,38 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
     getRequest(url,
         function success(events) {
             events = {
-                // "id-1": {
-                //     "start": 30,
-                //     "end": 150
-                // },
-                // "id-2": {
-                //     "start": 540,
-                //     "end": 650
-                // },
-                // "id-3": {
-                //     "start": 560,
-                //     "end": 620
-                // },
-                // "id-4": {
-                //     "start": 630,
-                //     "end": 700
-                // },
-                // "id-5": {
-                //     "start": 100,
-                //     "end": 400
-                // },
-                // "id-6": {
-                //     "start": 200,
-                //     "end": 300
-                // },
-                // "id-7": {
-                //     "start": 200,
-                //     "end": 300
-                // },
-                // "id-8": {
-                //     "start": 50,
-                //     "end": 700
-                // }
                 'one': {
                     start: 100,
                     end: 300
@@ -147,18 +115,62 @@ document.addEventListener('DOMContentLoaded', function() {
                     start: 400,
                     end: 500
                 },
-                // 'four': {
-                //     start: 150,
-                //     end: 500
+                'four': {
+                    start: 150,
+                    end: 500
+                },
+                'five': {
+                    start: 175,
+                    end: 450
+                },
+                'six': {
+                    start: 50,
+                    end: 125
+                },
+                "seven": {
+                    "start": 180,
+                    "end": 250
+                },
+                "eight": {
+                    "start": 540,
+                    "end": 650
+                },
+                "nine": {
+                    "start": 560,
+                    "end": 620
+                },
+                "ten": {
+                    "start": 630,
+                    "end": 700
+                },
+                "eleven": {
+                    "start": 100,
+                    "end": 400
+                },
+                "twelve": {
+                    "start": 200,
+                    "end": 300
+                },
+                "thirteen": {
+                    "start": 200,
+                    "end": 300
+                },
+                // "fourteen": {
+                //     "start": 50,
+                //     "end": 700
                 // },
-                // 'five': {
-                //     start: 175,
-                //     end: 450
-                // },
-                // 'six': {
-                //     start: 50,
-                //     end: 125
-                // }
+                "fifteen": {
+                    "start": 1,
+                    "end": 30
+                },
+                "sixteen": {
+                    "start": 1,
+                    "end": 30
+                },
+                "seventeen": {
+                    "start": 1,
+                    "end": 30
+                }
             }
 
             var eventsArray = []
