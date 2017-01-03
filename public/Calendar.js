@@ -59,7 +59,7 @@ Calendar.prototype.addEvents = function(newEvents) {
         collisions and the positions of the events
      */
     scope.collisions()
-    scope.recursivePlace()
+    scope.placeEvents()
 
     return scope.events
 }
@@ -96,9 +96,6 @@ Calendar.prototype.collisions = function() {
      */
     this.events = this.events.map(function(event) {
         if (event.collisions.length > 0) {
-            // event.equal = event.collisions.reduceRight(function(previous, current) {
-            //     return event.collisions.length === current.collisions.length
-            // }, true)
 
             // Determine if all collisions collide with each other
             event.equal = (event.collisions.reduce(function(previous, current) {
@@ -126,10 +123,12 @@ Calendar.prototype.recursivePlace = function() {
     var scope = this
 
     var recurse = function(event, index) {
-        // console.log('Recursing: ', event, index)
+        event.condition = 0
 
-        // If all events have equal amount of collisions / collide with each other
+        // Do nothing unless the event actually has collisions
         if (event.collisions.length > 0) {
+
+            // If all events have equal amount of collisions / collide with each other
             if (event.equal === true) {
                 event.index = index
                 event.width = scope.width / (event.collisions.length + 1)

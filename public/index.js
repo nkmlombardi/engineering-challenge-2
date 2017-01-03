@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'top: ' + event.top + 'px;' +
                     'left: ' + event.left + 'px;'
                 )
-                eventElement.innerHTML = '<span class="title">' + event.id + '</span>' + '<p>' + event.start + ' --> ' + event.end + '</p>'
+                eventElement.innerHTML = '<span class="title">Sample Item</span>' + '<p>Sample Location</p>'
                 eventList.appendChild(eventElement)
 
                 event.element = eventElement
