@@ -129,33 +129,35 @@ Calendar.prototype.recursivePlace = function() {
         // console.log('Recursing: ', event, index)
 
         // If all events have equal amount of collisions / collide with each other
-        if (event.equal === true) {
-            event.index = index
-            event.width = scope.width / (event.collisions.length + 1)
-            event.left = event.width * event.index
-            event.condition = 1
+        if (event.collisions.length > 0) {
+            if (event.equal === true) {
+                event.index = index
+                event.width = scope.width / (event.collisions.length + 1)
+                event.left = event.width * event.index
+                event.condition = 1
 
-        // If event doesn't have most collisions
-        } else if (event.collisions.length < event.maxCollisions) {
-            var indexes = event.collisions.map(function(cEvent) { return cEvent.index })
+            // If event doesn't have most collisions
+            } else if (event.collisions.length < event.maxCollisions) {
+                var indexes = event.collisions.map(function(cEvent) { return cEvent.index })
 
-            for (var i = 0; i < (event.collisions.length + 1); i++) {
-                if (indexes.indexOf(i) === -1) {
-                    event.index = i
-                    break
+                for (var i = 0; i < (event.collisions.length + 1); i++) {
+                    if (indexes.indexOf(i) === -1) {
+                        event.index = i
+                        break
+                    }
                 }
+
+                event.width = scope.width / event.maxCollisions
+                event.left = event.width * event.index
+                event.condition = 2
+
+            // If event has most collisions
+            } else {
+                event.width = scope.width / event.collisions.length
+                event.left = event.width * index
+                event.index = index
+                event.condition = 3
             }
-
-            event.width = scope.width / event.maxCollisions
-            event.left = event.width * event.index
-            event.condition = 2
-
-        // If event has most collisions
-        } else {
-            event.width = scope.width / event.collisions.length
-            event.left = event.width * index
-            event.index = index
-            event.condition = 3
         }
 
         event.set = true

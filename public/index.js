@@ -102,76 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     getRequest(url,
         function success(events) {
-            events = {
-                'one': {
-                    start: 100,
-                    end: 300
-                },
-                'two': {
-                    start: 250,
-                    end: 500
-                },
-                'three': {
-                    start: 400,
-                    end: 500
-                },
-                'four': {
-                    start: 150,
-                    end: 500
-                },
-                'five': {
-                    start: 175,
-                    end: 450
-                },
-                'six': {
-                    start: 50,
-                    end: 125
-                },
-                "seven": {
-                    "start": 180,
-                    "end": 250
-                },
-                "eight": {
-                    "start": 540,
-                    "end": 650
-                },
-                "nine": {
-                    "start": 560,
-                    "end": 620
-                },
-                "ten": {
-                    "start": 630,
-                    "end": 700
-                },
-                "eleven": {
-                    "start": 100,
-                    "end": 400
-                },
-                "twelve": {
-                    "start": 200,
-                    "end": 300
-                },
-                "thirteen": {
-                    "start": 200,
-                    "end": 300
-                },
-                // "fourteen": {
-                //     "start": 50,
-                //     "end": 700
-                // },
-                "fifteen": {
-                    "start": 1,
-                    "end": 30
-                },
-                "sixteen": {
-                    "start": 1,
-                    "end": 30
-                },
-                "seventeen": {
-                    "start": 1,
-                    "end": 30
-                }
-            }
+            events = JSON.parse(events)
 
             var eventsArray = []
 
